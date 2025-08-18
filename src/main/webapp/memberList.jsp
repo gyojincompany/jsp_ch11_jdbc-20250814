@@ -52,6 +52,7 @@
 			
 			while(rs.next()) {
 				MemberDto memberDto = new MemberDto();
+				//MemberDto memberDto = new MemberDto(rs.getString("memberid"),rs.getString("memberpw"));
 				memberDto.setMemberid(rs.getString("memberid"));
 				memberDto.setMemberpw(rs.getString("memberpw"));
 				memberDto.setMembername(rs.getString("membername"));

@@ -75,9 +75,9 @@
 		</tr>
 		</thead>
 		
-		<c:forEach var="boardDto" items="${boardList }" varStatus="status">
+		<c:forEach var="boardDto" items="${boardList }">
 			<tr>
-				<td>${status.count }</td>
+				<td>${boardDto.bnum}</td>
 				<td>
 				<!-- 게시판 글 제목이 40자 이상일때 40자 이상은 ...표시  -->
 					<c:choose>

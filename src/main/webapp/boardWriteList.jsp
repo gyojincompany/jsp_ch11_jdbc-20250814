@@ -1,3 +1,7 @@
+<%@page import="com.gyojincompany.member.BoardDto"%>
+<%@page import="com.gyojincompany.member.MemberDto"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="java.util.List"%>
 <%@page import="java.sql.Date"%>
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.Statement"%>
@@ -12,12 +16,12 @@
 <title>회원 정보 조회</title>
 </head>
 <body>
-	<h2>회원 정보 조회</h2>
+	<h2>모든 글 목록 리스트</h2>
 	<hr>
 	<%
 		request.setCharacterEncoding("utf-8");
 	
-		String mid = request.getParameter("sid"); //조회할 아이디		
+		//String mid = request.getParameter("sid"); //조회할 아이디		
 		//DB에 삽입할 데이터 준비 완료
 		
 		//DB 커넥션 준비
@@ -27,47 +31,48 @@
 		String password = "12345";
 		
 		//SQL문 만들기
-		String sql = "SELECT * FROM members WHERE memberid='" + mid + "'";
-		//String sql = "SELECT * FROM members where memberid='tiger99'";
+		//String sql = "SELECT * FROM members WHERE memberid='" + mid + "'";
+		String sql = "SELECT * FROM board ORDER BY bnum DESC"; //모든 게시판 글 리스트 반환
 		
 		
 		Connection conn = null; //커넥션 인터페이스로 선언 후 null로 초기값 설정
 		Statement stmt = null; //sql문을 관리해주는 객체를 선언해주는 인터페이스로 stmt 선언
 		ResultSet rs = null; //select문 실행 시 DB에서 반환해주는 레코드 결과를 받아주는 자료타입 rs 선언
+		List<BoardDto> boardList = new ArrayList<BoardDto>();
+		//1명의 회원정보 Dto객체들이 여러 개 저장될 리스트 선언
 		
 		try {
 			Class.forName(driverName); //MySQL 드라이버 클래스 불러오기			
 			conn = DriverManager.getConnection(url, username, password);
 			//커넥션이 메모리 생성(DB와 연결 커넥션 conn 생성)
 			stmt = conn.createStatement(); //stmt 객체 생성
-			
-			
-			//int sqlResult = stmt.executeUpdate(sql);
 			rs = stmt.executeQuery(sql); 
 			//select문 실행->결과가 DB로부터 반환->그 결과(레코드(행))을 받아 주는 ResultSet 타입 객체로 받아야 함			
 			
 			//String sid = null;
 			
-			if(rs.next()) { //참이면 레코드가 1개 이상 존재->아이디가 존재
-				 do { //rs에서 레코드를 추출하는 방법
-					String sid = rs.getString("memberid");
-					String spw = rs.getString("memberpw");
-					String sname = rs.getString("membername");
-					String semail = rs.getString("memberemail");
-					String sdate = rs.getString("memberdate");
-					
-					out.println("*****조회된 회원 정보*****<br>");
-					out.println(sid + " / " + spw + " / " + sname + " / " + semail + " / " + sdate + "<br>");						
-				} while(rs.next());
-			} else { //거짓이면 레코드가 0개->아이디 존재하지 않음
-				out.println("** 존재하지 않는 회원입니다 **");
+			while(rs.next()) {
+				BoardDto boardDto = new BoardDto();
+				boardDto.setBnum(rs.getInt("bnum"));
+				boardDto.setBtitle(rs.getString("btitle"));
+				boardDto.setBcontent(rs.getString("bcontent"));
+				boardDto.setMemberid(rs.getString("memberid"));
+				boardDto.setBdate(rs.getString("bdate"));
+				
+				boardList.add(boardDto);
 			}
-			//if(sid == null) {
-				//out.println("** 존재하지 않는 회원입니다 **");
-			//}
+						
+			
+			for(BoardDto bdto : boardList) {
+				out.println(bdto.getBnum() + " / "); 
+				out.println(bdto.getBtitle() + " / ");
+				out.println(bdto.getBcontent() + " / ");
+				out.println(bdto.getMemberid() + " / ");
+				out.println(bdto.getBdate() + "<br>");
+			}
 			
 		} catch (Exception e) {
-			out.println("DB 에러 발생! 회원 가입 실패!");
+			out.println("DB 에러 발생! 게시판 가져오기 실패!");
 			e.printStackTrace(); //에러 내용 출력
 		} finally { //에러의 발생여부와 상관 없이 Connection 닫기 실행 
 			try {
@@ -84,6 +89,10 @@
 				e.printStackTrace();
 			}
 		}
+		
+		request.setAttribute("boardList", boardList);		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("boardList.jsp");
+		dispatcher.forward(request, response);
 	
 	%>
 </body>
